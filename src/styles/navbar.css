@@ -1,5 +1,5 @@
 header{ 
-    @apply sticky z-[30px] top-0 pl-[50px] pr-[50px]
+    @apply sticky z-[30px] top-0 pl-[50px] pr-[50px] bg-white
 }
 nav{
     @apply flex p-[16px] justify-between items-center text-secondaryColor font-semibold
@@ -34,7 +34,7 @@ nav{
 
 @media screen and (min-width: 768px) {
   .nav__menu-bar{
-    display: none;
+    @apply invisible
   }
   .nav__menu-list{
     position: unset;
