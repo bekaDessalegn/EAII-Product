@@ -8,16 +8,14 @@ import Link from 'next/link';
 const Products = () => {
   return (
     <>
-    <div className='flex flex-col'>
-    <div className='w-screen h-screen flex flex-row justify-end items-end p-16 fixed'>
+    <Navbar />
+    <ProductsComponent />
+    <div className='fixed bottom-16 right-16'>
       <Link href='products/add_products'>
     <Fab className='bg-primaryColor text-onPrimary hover:bg-secondaryColor' aria-label="add">
         <AddIcon />
       </Fab>
       </Link>
-      </div>
-    <Navbar />
-    <ProductsComponent />
       </div>
     </>
   )
