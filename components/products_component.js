@@ -37,7 +37,7 @@ const ProductsComponent = () => {
     {products.map((product,index) => (
       <div key={index}>
     <div className='w-screen flex flex-row justify-end pr-36'>
-    <BiEdit size={30} className='cursor-pointer text-primaryColor'/>
+      <Link href='/products/edit_product'><BiEdit size={30} className='cursor-pointer text-primaryColor'/></Link>
     </div>
     <div className='w-screen flex flex-row'>
     <div className='w-1/2 pl-20'>

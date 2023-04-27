@@ -3,7 +3,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { Button } from 'flowbite-react';
 import {HiOutlineExclamationCircle} from 'react-icons/hi'
 
-export default function Modal({ isOpen, onClose, title, children, onClick }) {
+export default function DeleteModal({ isOpen, onClose, title, children, onClick }) {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog

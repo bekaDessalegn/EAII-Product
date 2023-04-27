@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useState } from 'react'
+import AdminModal from './admin_modal'
 
 const people = [
   { name: 'Abeni W', email: 'abenezerwassihun@gmail.com'},
@@ -12,7 +13,11 @@ const people = [
 ]
 
 const AdminsComponent = () => {
+
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
+    <>
     <div className="px-4 sm:px-6 lg:px-8">
       <div className='flex flex-col justify-center items-center'>
         <div className='border-2 p-6 rounded-lg bg-surface'>
@@ -21,7 +26,7 @@ const AdminsComponent = () => {
           <h1 className="text-base font-semibold leading-6 text-gray-900">Admins</h1>
         </div>
         <div className="sm:ml-16 sm:mt-0 sm:flex-none">
-        <div className='bg-primaryColor text-onPrimary px-4 py-1 rounded-lg cursor-pointer hover:bg-secondaryColor'>
+        <div onClick={() => setIsOpen(true)} className='bg-primaryColor text-onPrimary px-4 py-1 rounded-lg cursor-pointer hover:bg-secondaryColor'>
             Add Admin
             </div>
         </div>
@@ -72,6 +77,8 @@ const AdminsComponent = () => {
       </div>
       </div>
     </div>
+    <AdminModal isOpen={isOpen} onTap={() => setIsOpen(!isOpen)}/>
+    </>
   )
 }
 
