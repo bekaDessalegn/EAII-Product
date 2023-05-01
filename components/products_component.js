@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Skin from '../public/images/skin.jpg'
 import Image from 'next/image'
 import {BiEdit} from 'react-icons/bi'
 import Link from 'next/link'
+import { AiOutlineDelete } from 'react-icons/ai'
+import DeleteModal from './delete_modal'
 
 const products = [
   {
@@ -32,12 +34,23 @@ const products = [
 ]
 
 const ProductsComponent = () => {
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+
+  function onDelete() {
+    console.log("Delete");
+  }
+
   return (
     <>
+    <DeleteModal onClick={onDelete} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete link">
+        <p>Are you sure you want to delete this product ?</p>
+      </DeleteModal>
     {products.map((product,index) => (
       <div key={index}>
     <div className='w-screen flex flex-row justify-end pr-36'>
-      <Link href='/products/edit_product'><BiEdit size={30} className='cursor-pointer text-primaryColor'/></Link>
+      <Link href='/products/edit_product'><BiEdit size={28} className='cursor-pointer text-primaryColor'/></Link>
+      <AiOutlineDelete onClick={() => setIsDeleteOpen(true)} size={28} className='text-dangerColor cursor-pointer ml-2'/>
     </div>
     <div className='w-screen flex flex-row'>
     <div className='w-1/2 pl-20'>
