@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import AdminModal from './admin_modal'
 import DeleteModal from './delete_modal'
 import EditAdminModal from './edit_admin_modal'
 import { BiEdit } from 'react-icons/bi'
@@ -18,7 +17,6 @@ const admins = [
 
 const AdminsComponent = () => {
 
-  const [isOpen, setIsOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
 
@@ -43,7 +41,6 @@ const AdminsComponent = () => {
       </div>
       ))}
     </div>
-    <AdminModal isOpen={isOpen} onTap={() => setIsOpen(!isOpen)}/>
     <EditAdminModal isOpen={isEditOpen} onTap={() => setIsEditOpen(!isEditOpen)}/>
     </>
   )

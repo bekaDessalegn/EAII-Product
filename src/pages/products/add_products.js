@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Navbar from '../../../components/navbar'
 import {IoMdAdd} from 'react-icons/io'
 import {BiEdit} from 'react-icons/bi'
+import Dropdown from '../../../components/dropdown'
 
 const AddProducts = () => {
     const [image, setImage] = useState(null);
@@ -29,6 +30,10 @@ const AddProducts = () => {
     <div className='text-left my-4'>
         <p className='font-bold mb-1'>URL</p>
         <input id="url" type= 'text' name="url" placeholder={'Enter the product url'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
+    </div>
+    <div className='text-left my-4'>
+        <p className='font-bold mb-1'>Category</p>
+        <Dropdown />
     </div>
     <div className='text-left my-1'>
         <p className='font-bold mb-1'>Description</p>
