@@ -1,7 +1,78 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {AiOutlineClose} from 'react-icons/ai'
 
-const EditAdminModal = ({isOpen, onTap}) => {
+const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
+
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isValid, setIsValid] = useState(true)
+    const [inputValues, setInputValues] = useState({
+        username: admin.username,
+        email: admin.email
+      })
+    let adminId;
+
+    if(admin) {
+        adminId = admin.id;
+    }
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setInputValues((prevState) => ({ ...prevState, [name]: value }));
+      };
+
+    function registerAdmin(username, email) {
+
+        const token = localStorage.getItem('token');
+        setIsSubmitting(true)
+    
+        const query = `
+                    mutation {
+                        update_admin_by_pk(pk_columns: {id: "${admin.id}"}
+                        _set: {
+                        username: "${username}",
+                        email: "${email}"
+                        }
+                        ){
+                        username
+                        email
+                        }
+                    }
+            `;
+    
+            const options = {
+            method: 'POST',
+            headers: {
+              "Accept": "*/*",
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+          },
+            body: JSON.stringify({ query })
+            };
+    
+            fetch(process.env.baseUrl, options)
+            .then(response => response.json())
+            .then(data => {
+    
+              let admin = data.data;
+    
+              if((typeof admin === 'undefined')) {
+                setIsSubmitting(false)
+                setIsValid(false)
+              } else {
+                editAdmin({admin: `${adminId}`, username: `${username}`, email: `${email}`});
+                setIsSubmitting(false)
+                setIsValid(true)
+                onTap();
+              }
+            });
+      }
+
+      function onSubmit(event) {
+        event.preventDefault()
+        console.log(event.target.username.value)
+        // registerAdmin(event.target.username.value, event.target.email.value)
+      }
+
   return isOpen ? (
     <div className='fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center items-center'>
         <div className='bg-white p-12 rounded-md flex flex-col justify-center items-center w-[500px]'>
@@ -9,22 +80,24 @@ const EditAdminModal = ({isOpen, onTap}) => {
                 <AiOutlineClose onClick={onTap} className='cursor-pointer' size={25}/>
             </div>
         <p className='text-[20px] font-bold mb-8 mt-5'>Edit Admin</p>
+        <form onSubmit={onSubmit} className='w-full'>
         <div className='text-left my-1 w-full'>
         <p className='font-bold mb-1'>Username</p>
-        <input id="username" type= 'text' name="username" placeholder={'Enter username'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
+        <input value={inputValues.username} type= 'text' name="username" placeholder={'Enter username'} onChange={handleChange} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
     </div>
     <div className='text-left my-1 w-full'>
         <p className='font-bold mb-1'>Email</p>
-        <input id="email" type= 'text' name="email" placeholder={'Enter email'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
+        <input value={inputValues.email} type= 'text' name="email" placeholder={'Enter email'} onChange={handleChange} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
     </div>
-    <div className='text-left my-1 w-full'>
+    {/* <div className='text-left my-1 w-full'>
         <p className='font-bold mb-1'>Password</p>
-        <input id="admin_password" type= 'password' name="admin_password" placeholder={'Enter password'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
-    </div>
-    <div className={'w-full mt-10 bg-secondaryColor text-onPrimary rounded-lg mx-auto cursor-pointer hover:bg-primaryColor hover:text-onPrimary'}>
-            <div className='mx-5 py-2 text-center'>
-                Edit</div>
-        </div>
+        <input type= 'password' name="admin_password" placeholder={'Enter password'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
+    </div> */}
+    <div className='text-red-400 mt-10 w-full text-center mb-2 font-medium'>{isValid ? "" : "Something went wrong"}</div>
+    <button type='submit' disabled={isSubmitting} className='w-full bg-secondaryColor disabled:bg-gray-300 disabled:text-gray-600 text-onPrimary rounded-lg cursor-pointer  py-2 text-center hover:bg-primaryColor'>
+                                {isSubmitting ? "Please Wait..." : "Edit"}
+                            </button>
+        </form>
         </div>
     </div>
   ) : (<></>)

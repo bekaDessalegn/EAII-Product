@@ -3,6 +3,9 @@ import Image from "next/image";
 import React, { useState } from "react";
 import NavItem from "./navbaritem.js";
 import logo from '../public/images/logo.png'
+import cookieCutter from 'cookie-cutter'
+import { useRouter } from "next/router.js";
+import DeleteModal from "./delete_modal.js";
 
 const MENU_LIST = [
   { text: "Home", href: "/" },
@@ -13,8 +16,15 @@ const MENU_LIST = [
 const Navbar = () => {
   const [navActive, setNavActive] = useState(null);
   const [activeIdx, setActiveIdx] = useState(-1);
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+
+  const router = useRouter();
 
   return (
+    <>
+    <DeleteModal onClick={logout} isOpen={isLogoutOpen} onClose={() => setIsLogoutOpen(false)} title="Logout">
+        <p>Are you sure you want to logout ?</p>
+      </DeleteModal>
     <header>
       <nav className={`nav`}>
         <div className="flex flex-row justify-center items-center">
@@ -44,11 +54,19 @@ const Navbar = () => {
               <NavItem active={activeIdx === idx} {...menu} />
             </div>
           ))}
-          <div className='logout'>Logout</div>
+          <div onClick={() => setIsLogoutOpen(true)} className='logout'>Logout</div>
         </div>
       </nav>
     </header>
+    </>
   );
+
+  function logout() {
+    cookieCutter.set('signed-in', false)
+    localStorage.removeItem('token');
+    router.replace('/signin')
+}
+
 };
 
 export default Navbar;

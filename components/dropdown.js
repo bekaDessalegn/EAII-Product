@@ -1,22 +1,55 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {AiFillCaretDown, AiFillCaretUp} from "react-icons/ai"
 
-const categories = ["Health", "Agriculture", "Language", "Finance"]
-
-const Dropdown = () => {
+const Dropdown = ({selectedCategory, setCategory}) => {
 
   const [isOpen, setIsOpen] = useState(false)
-  const [category, setSelectedItem] = useState([])
+  const [categories, setCategories] = useState([])
 
-  function getText(item) {
-    var category = document.getElementById("value");
-    category.value = item;
+  const fetchData = () => {
+
+    const token = localStorage.getItem('token');
+
+    const query = `
+        query {
+          categories{
+            name
+          }
+          }
+        `;
+
+        const options = {
+        method: 'POST',
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+      },
+        body: JSON.stringify({ query })
+        };
+
+        fetch(process.env.baseUrl, options)
+        .then(response => response.json())
+        .then(data => {
+
+          let cats = data.data;
+
+          if((typeof cats === 'undefined')) {
+
+          } else {
+            setCategories(data.data.categories);
+          }
+        });
   }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <div className='w-full relative flex flex-col md:w-[340px] rounded-lg'>
       <div onClick={() => setIsOpen((prev) => !prev)} className='bg-textFormbg border-textFormBorderbg rounded-lg p-2 w-full flex items-center justify-between border-2 active:border-accentColor duration-300 active:text-accentColor cursor-pointer'>
-        {category.length > 0 ? (<p>{category}</p>) : (<p>Dropdown</p>)}
+        <p>{selectedCategory}</p>
         {!isOpen ? (
           <AiFillCaretDown />
         ) : (
@@ -24,17 +57,15 @@ const Dropdown = () => {
         ) }
         </div>
         {isOpen && (<div className='bg-textFormbg border-textFormBorderbg border-2 absolute top-14 flex flex-col items-start rounded-lg p-2 w-full'>
-          {categories.map((item, i) => (
+          {categories.map((category, i) => (
             <div onClick={() => {
-              setSelectedItem(item)
+              setCategory(category.name)
               setIsOpen((prev) => !prev)
-              getText(item);
               }} className='hover:bg-background2 cursor-pointer w-full rounded-r-lg border-l-transparent hover:border-l-accentColor border-l-4' key={i}>
-              <h3 id="category">{item}</h3>
+              <h3 id="category">{category.name}</h3>
             </div>
           ))}
         </div>)}
-        <input id='value' name='category' className='hidden' value={category}/>
     </div>
   )
 }

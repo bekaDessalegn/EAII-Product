@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Skin from '../public/images/skin.jpg'
 import Image from 'next/image'
 import {BiEdit} from 'react-icons/bi'
@@ -6,40 +6,58 @@ import Link from 'next/link'
 import { AiOutlineDelete } from 'react-icons/ai'
 import DeleteModal from './delete_modal'
 
-const products = [
-  {
-    title: "Diabetes",
-    description: "Diabetes is a leading cause of blindness, kidney failure, heart attacks, stroke, and amputation of lower limbs. Diabetes burden is strongly linked to metabolic risks and behavioral factors. Algorithms supporting predictive models for the risk of getting diabetes or its complications have been developed using artificial intelligence. It is also capable of identifying diabetes mellitus type based on the data obtained from a patient.",
-    imageUrl: Skin,
-    urlLink: "https://www.youtube.com/"
-},
-{
-  title: "Diabetes",
-  description: "Diabetes is a leading cause of blindness, kidney failure, heart attacks, stroke, and amputation of lower limbs. Diabetes burden is strongly linked to metabolic risks and behavioral factors. Algorithms supporting predictive models for the risk of getting diabetes or its complications have been developed using artificial intelligence. It is also capable of identifying diabetes mellitus type based on the data obtained from a patient.",
-  imageUrl: Skin,
-  urlLink: "https://www.youtube.com/"
-},
-{
-  title: "Diabetes",
-  description: "Diabetes is a leading cause of blindness, kidney failure, heart attacks, stroke, and amputation of lower limbs. Diabetes burden is strongly linked to metabolic risks and behavioral factors. Algorithms supporting predictive models for the risk of getting diabetes or its complications have been developed using artificial intelligence. It is also capable of identifying diabetes mellitus type based on the data obtained from a patient.",
-  imageUrl: Skin,
-  urlLink: "https://www.youtube.com/"
-},
-{
-  title: "Diabetes",
-  description: "Diabetes is a leading cause of blindness, kidney failure, heart attacks, stroke, and amputation of lower limbs. Diabetes burden is strongly linked to metabolic risks and behavioral factors. Algorithms supporting predictive models for the risk of getting diabetes or its complications have been developed using artificial intelligence. It is also capable of identifying diabetes mellitus type based on the data obtained from a patient.",
-  imageUrl: Skin,
-  urlLink: "https://www.youtube.com/"
-}
-]
-
 const ProductsComponent = () => {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [products, setProducts] = useState([])
 
   function onDelete() {
     console.log("Delete");
   }
+
+  const fetchData = () => {
+
+    const token = localStorage.getItem('token');
+
+    const query = `
+          query{
+            products{
+              title
+              description
+              url
+              image_path
+              category_name
+            }
+          }
+        `;
+
+        const options = {
+        method: 'POST',
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+      },
+        body: JSON.stringify({ query })
+        };
+
+        fetch(process.env.baseUrl, options)
+        .then(response => response.json())
+        .then(data => {
+
+          let prods = data.data;
+
+          if((typeof prods === 'undefined')) {
+
+          } else {
+            setProducts(data.data.products);
+          }
+        });
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -56,11 +74,11 @@ const ProductsComponent = () => {
     <div className='w-1/2 pl-20'>
       <p className='font-semibold text-[36px] pb-3'>{product.title}</p>
       <p>{product.description}</p>
-      <Link href="https://www.youtube.com"><p className='text-primaryColor mt-6 cursor-pointer'>Go to product</p></Link>
+      <Link href={product.url}><p className='text-primaryColor mt-6 cursor-pointer'>Go to product</p></Link>
     </div>
     <div className='w-1/2 h-full hidden md:flex justify-center items-center'>
             <div className=''>
-                <Image className='max-w-[350px]' src={Skin} />
+                <img className='max-w-[350px]' src={product.image_path} />
             </div>
         </div>
     </div></div>))}

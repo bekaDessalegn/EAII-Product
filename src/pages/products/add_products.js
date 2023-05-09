@@ -3,9 +3,15 @@ import Navbar from '../../../components/navbar'
 import {IoMdAdd} from 'react-icons/io'
 import {BiEdit} from 'react-icons/bi'
 import Dropdown from '../../../components/dropdown'
+import { useRouter } from 'next/router'
 
 const AddProducts = () => {
     const [image, setImage] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState("Options")
+    const [isValid, setIsValid] = useState(true)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const router = useRouter();
 
     const hiddenClicked = () => {
         document.getElementById("hiddenFile").click();
@@ -15,6 +21,87 @@ const AddProducts = () => {
         setImage(e.target.files[0]);
       };
 
+      async function uploadImage() {
+        let headersList = {
+          "Accept": "*/*"
+         }
+         
+         let bodyContent = new FormData();
+         bodyContent.append("upload_preset", "cvm3azcu");
+         bodyContent.append("file", image);
+         
+         let response = await fetch("https://api.cloudinary.com/v1_1/ddkybdc5n/image/upload", { 
+           method: "POST",
+           body: bodyContent,
+           headers: headersList
+         });
+         
+         let data = await response.json();
+         console.log(data.url);
+         return data.url;
+      }
+
+      function postProduct(title, description, url, image_path, category_name) {
+
+        const token = localStorage.getItem('token');
+    
+        const query = `
+                mutation{
+                    insert_products(objects: {
+                      title: "${title}",
+                      description: "${description}",
+                      url: "${url}",
+                      image_path: "${image_path}",
+                      category_name: "${category_name}"
+                    }){
+                      returning{
+                        title
+                      }
+                    }
+                }
+            `;
+    
+            const options = {
+            method: 'POST',
+            headers: {
+              "Accept": "*/*",
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json"
+          },
+            body: JSON.stringify({ query })
+            };
+    
+            fetch(process.env.baseUrl, options)
+            .then(response => response.json())
+            .then(data => {
+    
+              let category = data.data;
+    
+              if((typeof category === 'undefined')) {
+              } else {
+                setIsSubmitting(false)
+                router.replace('/products')
+              }
+            });
+      }
+
+      async function onSubmit(event) {
+        event.preventDefault();
+        setIsSubmitting(true)
+        if(selectedCategory == "Options") {
+          setIsValid(false);
+        } else {
+          setIsValid(true);
+          if(image) {
+            const imageUrl = await uploadImage();
+            postProduct(event.target.title.value, event.target.description.value, event.target.url.value, imageUrl, selectedCategory);
+            setIsSubmitting(false);
+          } else {
+            setIsSubmitting(false);
+          }
+        }
+      }
+
   return (
     <>
     <Navbar />
@@ -23,6 +110,7 @@ const AddProducts = () => {
         <div className='grid text-center gap-2 mb-5 mt-10'>
         <div className='text-3xl'>Add Product</div>
                 </div>
+                <form onSubmit={onSubmit}>
                 <div className='text-left my-1'>
         <p className='font-bold mb-1'>Title</p>
         <input id="title" type= 'text' name="title" placeholder={'Enter the product title'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
@@ -33,7 +121,8 @@ const AddProducts = () => {
     </div>
     <div className='text-left my-4'>
         <p className='font-bold mb-1'>Category</p>
-        <Dropdown />
+        <Dropdown selectedCategory={selectedCategory} setCategory= {(category) => setSelectedCategory(category)} />
+        <div className='text-red-400 mt-10 w-full text-center mb-2 font-medium'>{isValid ? "" : "Please select a category"}</div>
     </div>
     <div className='text-left my-1'>
         <p className='font-bold mb-1'>Description</p>
@@ -66,9 +155,10 @@ const AddProducts = () => {
               />
         </div>)}
     </div>
-    <div className='bg-primaryColor text-onPrimary rounded-lg w-full py-2 flex justify-center my-1 cursor-pointer text-center hover:bg-secondaryColor mt-20'>
-                <p className='font-bold'>Add Product</p>
-            </div>
+    <button type='submit' disabled={isSubmitting} className='w-full bg-primaryColor font-bold disabled:bg-gray-300 disabled:text-gray-600 text-onPrimary rounded-lg cursor-pointer mt-14 py-2 text-center hover:bg-secondaryColor'>
+                                {isSubmitting ? "Please Wait..." : "Add Product"}
+                            </button>
+            </form>
         </div>
     </div>
     </>

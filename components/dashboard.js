@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import logo from '../public/images/logo.png'
 import Link from 'next/link'
 import { BsFillPersonFill } from 'react-icons/bs'
@@ -11,6 +11,70 @@ const Dashboard = () => {
 
     const [isAdminOpen, setIsAdminOpen] = useState(false)
     const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+    const [productCount, setProductCount] = useState();
+    const [categoryCount, setCategoryCount] = useState();
+    const [adminCount, setAdminCount] = useState();
+
+    const stats = [
+        { id: 1, name: 'Admins', stat: `${adminCount}`,  link: "/admins", icon: <BsFillPersonFill className="h-6 w-6 text-white" /> },
+        { id: 2, name: 'Products', stat: `${productCount}`,  link: "/products", icon: <BiPackage className="h-6 w-6 text-white" /> },
+        { id: 3, name: 'Categories', stat: `${categoryCount}`,  link: "/categories", icon: <BiCategory className="h-6 w-6 text-white" /> }
+    ];
+
+    const fetchData = () => {
+
+        const token = localStorage.getItem('token');
+
+        const query = `
+                query {
+                    categories_aggregate {
+                    aggregate {
+                        count
+                    }
+                    }
+                    products_aggregate {
+                    aggregate {
+                        count
+                    }
+                    }
+                    admin_aggregate{
+                        aggregate{
+                          count
+                        }
+                      }
+                }
+            `;
+    
+            const options = {
+            method: 'POST',
+            headers: {
+                "Accept": "*/*",
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ query })
+            };
+    
+            fetch(process.env.baseUrl, options)
+            .then(response => response.json())
+            .then(data => {
+    
+              let prods = data.data;
+    
+              if((typeof prods === 'undefined')) {
+                console.log(data)
+              } else {
+                console.log(data.data)
+                setCategoryCount(data.data.categories_aggregate.aggregate.count);
+                setProductCount(data.data.products_aggregate.aggregate.count);
+                setAdminCount(data.data.admin_aggregate.aggregate.count);
+              }
+            });
+      }
+    
+      useEffect(() => {
+        fetchData();
+      }, []);
 
     return (
         <div className='flex flex-col justify-center items-center'>
@@ -50,7 +114,7 @@ const Dashboard = () => {
                     }
                 </dl>
             </div>
-            <div className='mx-10 mt-10'>
+            <div className='m-10'>
                 <p className='text-[20px] font-bold text-secondaryColor'>Quick Links</p>
                 <div className='grid grid-cols-3 mt-4 gap-3'>
                     <div onClick={() => setIsAdminOpen(true)} className='border-2 border-primaryColor px-3 py-2 rounded-md text-primaryColor text-center font-bold cursor-pointer'>Add Admin</div>
@@ -65,9 +129,4 @@ const Dashboard = () => {
     )
 }
 
-const stats = [
-    { id: 1, name: 'Admins', stat: '5',  link: "/admins", icon: <BsFillPersonFill className="h-6 w-6 text-white" /> },
-    { id: 2, name: 'Products', stat: '12',  link: "/products", icon: <BiPackage className="h-6 w-6 text-white" /> },
-    { id: 3, name: 'Categories', stat: '4',  link: "/categories", icon: <BiCategory className="h-6 w-6 text-white" /> }
-]
 export default Dashboard
