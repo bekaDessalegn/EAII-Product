@@ -14,8 +14,42 @@ const AdminsComponent = () => {
   const [selectedAdmin, setSelectedAdmin] = useState();
   const [isOpen, setIsOpen] = useState(false)
 
-  function onDelete() {
-    console.log("Delete");
+  function deleteAdmin() {
+
+    const token = localStorage.getItem('token');
+
+    const query = `
+            mutation{
+              delete_admin_by_pk(id: "${selectedAdmin.id}"){
+                id
+                username
+                email
+              }
+            }
+        `;
+
+        const options = {
+        method: 'POST',
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+      },
+        body: JSON.stringify({ query })
+        };
+
+        fetch(process.env.baseUrl, options)
+        .then(response => response.json())
+        .then(data => {
+
+          let admin = data.data;
+
+          if((typeof admin === 'undefined')) {
+          } else {
+            setAdmins(admins.filter((admin) => admin.id !== selectedAdmin.id))
+            setIsDeleteOpen(false);
+          }
+        });
   }
 
   const fetchData = () => {
@@ -25,6 +59,7 @@ const AdminsComponent = () => {
     const query = `
             query {
               admin{
+                id
                 username
                 email
               }
@@ -61,7 +96,9 @@ const AdminsComponent = () => {
 
   return (
     <>
-    <DeleteModal onClick={onDelete} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete link">
+    <DeleteModal onClick={() => {
+      deleteAdmin();
+    }} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete link">
         <p>Are you sure you want to delete this admin ?</p>
       </DeleteModal>
       <div className='grid lg:grid-cols-4 md:grid-cols-3 gap-10 mx-10 mt-10'>
@@ -71,18 +108,26 @@ const AdminsComponent = () => {
           <BiEdit onClick={() => {
             setSelectedAdmin(admin);
             setIsEditOpen(true)}} size={21} className='text-primaryColor cursor-pointer'/>
-          <AiOutlineDelete onClick={() => setIsDeleteOpen(true)} size={21} className='text-dangerColor cursor-pointer ml-2'/>
+          <AiOutlineDelete onClick={() => {
+            setSelectedAdmin(admin);
+            setIsDeleteOpen(true)}} size={21} className='text-dangerColor cursor-pointer ml-2'/>
           </div>
         <p className='text-[24px]'>{admin.username}</p>
         <p className='text-[16px]'>{admin.email}</p>
       </div>
       ))}
     </div>
-    {selectedAdmin && <EditAdminModal admin={selectedAdmin} editAdmin={(editedAdmin) => setAdmins(admins.find(function(admin) {
-                                                  if (admin.id === editedAdmin.id) {
-                                                    admin = editedAdmin;
-                                                  }
-                                                }))} isOpen={isEditOpen} onTap={() => setIsEditOpen(!isEditOpen)}/>}
+    {selectedAdmin && <EditAdminModal admin={selectedAdmin} editAdmin={(editedAdmin) => { 
+      console.log(editedAdmin);
+      let newAdmins = admins;
+      newAdmins.find(function(admin) {
+        if (admin.id == editedAdmin.id) {
+          admin.username = editedAdmin.username;
+          admin.email = editedAdmin.email;
+        }
+      })
+      setAdmins(newAdmins);
+        }} isOpen={isEditOpen} onTap={() => setIsEditOpen(!isEditOpen)}/>}
     <div className='fixed bottom-16 right-16'>
       <div onClick={() => setIsOpen(true)} className='p-4 rounded-full cursor-pointer bg-primaryColor text-onPrimary hover:bg-secondaryColor'>
         <AddIcon />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {AiOutlineClose} from 'react-icons/ai'
 
 const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
@@ -9,11 +9,14 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
         username: admin.username,
         email: admin.email
       })
-    let adminId;
 
-    if(admin) {
-        adminId = admin.id;
-    }
+    useEffect(() => {
+        setInputValues({
+            id: admin.id,
+            username: admin.username,
+            email: admin.email
+          })
+      }, [admin]);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -27,7 +30,7 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
     
         const query = `
                     mutation {
-                        update_admin_by_pk(pk_columns: {id: "${admin.id}"}
+                        update_admin_by_pk(pk_columns: {id: "${inputValues.id}"}
                         _set: {
                         username: "${username}",
                         email: "${email}"
@@ -54,12 +57,14 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
             .then(data => {
     
               let admin = data.data;
+
+              console.log(data)
     
               if((typeof admin === 'undefined')) {
                 setIsSubmitting(false)
                 setIsValid(false)
               } else {
-                editAdmin({admin: `${adminId}`, username: `${username}`, email: `${email}`});
+                editAdmin({id: `${inputValues.id}`, username: `${username}`, email: `${email}`});
                 setIsSubmitting(false)
                 setIsValid(true)
                 onTap();
@@ -69,8 +74,8 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
 
       function onSubmit(event) {
         event.preventDefault()
-        console.log(event.target.username.value)
-        // registerAdmin(event.target.username.value, event.target.email.value)
+        // console.log(event.target.username.value)
+        registerAdmin(event.target.username.value, event.target.email.value)
       }
 
   return isOpen ? (

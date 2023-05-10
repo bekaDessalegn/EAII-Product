@@ -1,18 +1,51 @@
 import React, { useEffect, useState } from 'react'
-import Skin from '../public/images/skin.jpg'
-import Image from 'next/image'
 import {BiEdit} from 'react-icons/bi'
 import Link from 'next/link'
 import { AiOutlineDelete } from 'react-icons/ai'
 import DeleteModal from './delete_modal'
+import { useRouter } from 'next/router';
 
 const ProductsComponent = () => {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [products, setProducts] = useState([])
+  const [productId, setProductId] = useState();
 
-  function onDelete() {
-    console.log("Delete");
+  function deleteProduct() {
+
+    const token = localStorage.getItem('token');
+
+    const query = `
+        mutation{
+          delete_products_by_pk(id: ${productId}){
+            id
+            title
+          }
+        }
+        `;
+
+        const options = {
+        method: 'POST',
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+      },
+        body: JSON.stringify({ query })
+        };
+
+        fetch(process.env.baseUrl, options)
+        .then(response => response.json())
+        .then(data => {
+
+          let admin = data.data;
+
+          if((typeof admin === 'undefined')) {
+          } else {
+            setProducts(products.filter((product) => product.id !== productId))
+            setIsDeleteOpen(false);
+          }
+        });
   }
 
   const fetchData = () => {
@@ -22,6 +55,7 @@ const ProductsComponent = () => {
     const query = `
           query{
             products{
+              id
               title
               description
               url
@@ -61,14 +95,16 @@ const ProductsComponent = () => {
 
   return (
     <>
-    <DeleteModal onClick={onDelete} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete link">
+    <DeleteModal onClick={deleteProduct} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete link">
         <p>Are you sure you want to delete this product ?</p>
       </DeleteModal>
     {products.map((product,index) => (
       <div key={index}>
     <div className='w-screen flex flex-row justify-end pr-36'>
-      <Link href='/products/edit_product'><BiEdit size={28} className='cursor-pointer text-primaryColor'/></Link>
-      <AiOutlineDelete onClick={() => setIsDeleteOpen(true)} size={28} className='text-dangerColor cursor-pointer ml-2'/>
+      <Link href={`/products/edit_product?id=${product.id}`}><BiEdit size={28} className='cursor-pointer text-primaryColor'/></Link>
+      <AiOutlineDelete onClick={() => {
+        setProductId(product.id);
+        setIsDeleteOpen(true)}} size={28} className='text-dangerColor cursor-pointer ml-2'/>
     </div>
     <div className='w-screen flex flex-row'>
     <div className='w-1/2 pl-20'>
