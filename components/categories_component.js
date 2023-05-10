@@ -11,10 +11,44 @@ const CategoriesComponent = () => {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [categories, setCategories] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState();
   const [isOpen, setIsOpen] = useState(false)
 
-  function onDelete() {
-    console.log("Delete");
+  function deleteCategory() {
+
+    const token = localStorage.getItem('token');
+
+    const query = `
+            mutation{
+              delete_categories_by_pk(id: "${selectedCategory.id}"){
+                id
+                name
+              }
+            }
+        `;
+
+        const options = {
+        method: 'POST',
+        headers: {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+      },
+        body: JSON.stringify({ query })
+        };
+
+        fetch(process.env.baseUrl, options)
+        .then(response => response.json())
+        .then(data => {
+
+          let admin = data.data;
+
+          if((typeof admin === 'undefined')) {
+          } else {
+            setCategories(categories.filter((category) => category.id !== selectedCategory.id))
+            setIsDeleteOpen(false);
+          }
+        });
   }
 
   const fetchData = () => {
@@ -24,6 +58,7 @@ const CategoriesComponent = () => {
     const query = `
         query {
           categories{
+            id
             name
             description
           }
@@ -61,22 +96,37 @@ const CategoriesComponent = () => {
 
   return (
     <>
-    <DeleteModal onClick={onDelete} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete link">
+    <DeleteModal onClick={deleteCategory} isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Delete link">
         <p>Are you sure you want to delete this category ?</p>
       </DeleteModal>
     <div className='grid lg:grid-cols-4 md:grid-cols-3 gap-10 mx-10 mt-10'>
       {categories.length == 0 ? <div> Loading </div> : categories.map((category) => (
         <div className='border-2 rounded-md px-8 py-8 bg-surface'>
         <div className='w-full flex justify-end'>
-          <BiEdit onClick={() => setIsEditOpen(true)} size={21} className='text-primaryColor cursor-pointer'/>
-          <AiOutlineDelete onClick={() => setIsDeleteOpen(true)} size={21} className='text-dangerColor cursor-pointer ml-2'/>
+          <BiEdit onClick={() => {
+            setSelectedCategory(category);
+            setIsEditOpen(true)}} size={21} className='text-primaryColor cursor-pointer'/>
+          <AiOutlineDelete onClick={() => {
+            setSelectedCategory(category);
+            setIsDeleteOpen(true)}} size={21} className='text-dangerColor cursor-pointer ml-2'/>
           </div>
         <p className='text-[24px]'>{category.name}</p>
         <p className='text-[16px]'>{category.description}</p>
       </div>
       ))}
     </div>
-    <EditCategoryModal isOpen={isEditOpen} onTap={() => setIsEditOpen(!isEditOpen)}/>
+    {selectedCategory && <EditCategoryModal category={selectedCategory} editCategory={(editedCategory) => {
+      console.log("TTTTTTTTTTTTTTTTTTTTTTTT"); 
+      console.log(editedCategory);
+      let newCategories = categories;
+      newCategories.find(function(category) {
+        if (category.id == editedCategory.id) {
+          category.name = editedCategory.name;
+          category.description = editedCategory.description;
+        }
+      })
+      setCategories(newCategories);
+        }} isOpen={isEditOpen} onTap={() => setIsEditOpen(!isEditOpen)}/>}
     <div className='fixed bottom-16 right-16'>
       <div onClick={() => setIsOpen(true)} className='p-4 rounded-full cursor-pointer bg-primaryColor text-onPrimary hover:bg-secondaryColor'>
         <AddIcon />

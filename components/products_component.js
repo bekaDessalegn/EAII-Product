@@ -3,7 +3,6 @@ import {BiEdit} from 'react-icons/bi'
 import Link from 'next/link'
 import { AiOutlineDelete } from 'react-icons/ai'
 import DeleteModal from './delete_modal'
-import { useRouter } from 'next/router';
 
 const ProductsComponent = () => {
 

@@ -64,7 +64,6 @@ const Dashboard = () => {
               if((typeof prods === 'undefined')) {
                 console.log(data)
               } else {
-                console.log(data.data)
                 setCategoryCount(data.data.categories_aggregate.aggregate.count);
                 setProductCount(data.data.products_aggregate.aggregate.count);
                 setAdminCount(data.data.admin_aggregate.aggregate.count);
