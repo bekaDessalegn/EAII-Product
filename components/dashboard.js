@@ -6,6 +6,8 @@ import { BsFillPersonFill } from 'react-icons/bs'
 import { BiCategory, BiPackage } from 'react-icons/bi'
 import AdminModal from './admin_modal'
 import CategoryModal from './category_modal'
+import cookieCutter from 'cookie-cutter'
+import { useRouter } from 'next/router'
  
 const Dashboard = () => {
 
@@ -14,6 +16,8 @@ const Dashboard = () => {
     const [productCount, setProductCount] = useState();
     const [categoryCount, setCategoryCount] = useState();
     const [adminCount, setAdminCount] = useState();
+
+    const router = useRouter();
 
     const stats = [
         { id: 1, name: 'Admins', stat: `${adminCount}`,  link: "/admins", icon: <BsFillPersonFill className="h-6 w-6 text-white" /> },
@@ -63,6 +67,11 @@ const Dashboard = () => {
     
               if((typeof prods === 'undefined')) {
                 console.log(data)
+                if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+                    cookieCutter.set('signed-in', false)
+                    localStorage.removeItem('token');
+                    router.replace('/signin')
+                }
               } else {
                 setCategoryCount(data.data.categories_aggregate.aggregate.count);
                 setProductCount(data.data.products_aggregate.aggregate.count);

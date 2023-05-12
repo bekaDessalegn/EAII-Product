@@ -4,6 +4,7 @@ import {IoMdAdd} from 'react-icons/io'
 import {BiEdit} from 'react-icons/bi'
 import Dropdown from '../../../components/dropdown'
 import { useRouter } from 'next/router'
+import cookieCutter from 'cookie-cutter'
 
 const EditProducts = () => {
     const [image, setImage] = useState(null);
@@ -55,7 +56,11 @@ const EditProducts = () => {
               let prods = data.data;
     
               if((typeof prods === 'undefined')) {
-    
+                if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+                  cookieCutter.set('signed-in', false)
+                  localStorage.removeItem('token');
+                  router.replace('/signin')
+              }
               } else {
                 const prod = prods.products.filter((item) => item.id == id)[0];
                 setInputValues({

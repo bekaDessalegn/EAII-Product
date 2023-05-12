@@ -5,6 +5,8 @@ import EditCategoryModal from './edit_category_modal'
 import DeleteModal from './delete_modal'
 import CategoryModal from './category_modal'
 import AddIcon from '@mui/icons-material/Add';
+import { useRouter } from 'next/router'
+import cookieCutter from 'cookie-cutter'
 
 const CategoriesComponent = () => {
 
@@ -13,6 +15,8 @@ const CategoriesComponent = () => {
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState();
   const [isOpen, setIsOpen] = useState(false)
+
+  const router = useRouter();
 
   function deleteCategory() {
 
@@ -44,6 +48,11 @@ const CategoriesComponent = () => {
           let admin = data.data;
 
           if((typeof admin === 'undefined')) {
+            if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+              cookieCutter.set('signed-in', false)
+              localStorage.removeItem('token');
+              router.replace('/signin')
+          }
           } else {
             setCategories(categories.filter((category) => category.id !== selectedCategory.id))
             setIsDeleteOpen(false);
@@ -82,7 +91,11 @@ const CategoriesComponent = () => {
           let cats = data.data;
 
           if((typeof cats === 'undefined')) {
-
+            if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+              cookieCutter.set('signed-in', false)
+              localStorage.removeItem('token');
+              router.replace('/signin')
+          }
           } else {
             setCategories(data.data.categories);
           }

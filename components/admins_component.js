@@ -5,6 +5,8 @@ import { BiEdit } from 'react-icons/bi'
 import { AiOutlineDelete } from 'react-icons/ai'
 import AddIcon from '@mui/icons-material/Add';
 import AdminModal from './admin_modal';
+import { useRouter } from 'next/router'
+import cookieCutter from 'cookie-cutter'
 
 const AdminsComponent = () => {
 
@@ -13,6 +15,8 @@ const AdminsComponent = () => {
   const [admins, setAdmins] = useState([]);
   const [selectedAdmin, setSelectedAdmin] = useState();
   const [isOpen, setIsOpen] = useState(false)
+
+  const router = useRouter();
 
   function deleteAdmin() {
 
@@ -45,6 +49,11 @@ const AdminsComponent = () => {
           let admin = data.data;
 
           if((typeof admin === 'undefined')) {
+            if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+              cookieCutter.set('signed-in', false)
+              localStorage.removeItem('token');
+              router.replace('/signin')
+          }
           } else {
             setAdmins(admins.filter((admin) => admin.id !== selectedAdmin.id))
             setIsDeleteOpen(false);
@@ -84,6 +93,11 @@ const AdminsComponent = () => {
 
           if((typeof prods === 'undefined')) {
             console.log(data)
+            if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+              cookieCutter.set('signed-in', false)
+              localStorage.removeItem('token');
+              router.replace('/signin')
+          }
           } else {
             setAdmins(data.data.admin);
           }

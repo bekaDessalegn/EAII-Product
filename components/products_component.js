@@ -3,12 +3,16 @@ import {BiEdit} from 'react-icons/bi'
 import Link from 'next/link'
 import { AiOutlineDelete } from 'react-icons/ai'
 import DeleteModal from './delete_modal'
+import { useRouter } from 'next/router'
+import cookieCutter from 'cookie-cutter'
 
 const ProductsComponent = () => {
 
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [products, setProducts] = useState([])
   const [productId, setProductId] = useState();
+
+  const router = useRouter();
 
   function deleteProduct() {
 
@@ -40,6 +44,11 @@ const ProductsComponent = () => {
           let admin = data.data;
 
           if((typeof admin === 'undefined')) {
+            if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+              cookieCutter.set('signed-in', false)
+              localStorage.removeItem('token');
+              router.replace('/signin')
+          }
           } else {
             setProducts(products.filter((product) => product.id !== productId))
             setIsDeleteOpen(false);
