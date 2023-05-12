@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {AiOutlineClose} from 'react-icons/ai'
 
-const CategoryModal = ({addCategory, isOpen, onTap}) => {
+const CategoryModal = ({addCategory, quickAdd, isOpen, onTap}) => {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isValid, setIsValid] = useState(true)
@@ -45,7 +45,12 @@ const CategoryModal = ({addCategory, isOpen, onTap}) => {
                 setIsSubmitting(false)
                 setIsValid(false)
               } else {
-                addCategory({name: `${name}`, description: `${description}`});
+                if(addCategory) {
+                  addCategory({name: `${name}`, description: `${description}`});
+                }
+                if(quickAdd) {
+                  quickAdd();
+                }
                 setIsSubmitting(false)
                 setIsValid(true)
                 onTap();

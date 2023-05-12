@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {AiOutlineClose} from 'react-icons/ai'
 
-const AdminModal = ({addAdmin, isOpen, onTap}) => {
+const AdminModal = ({addAdmin, quickAdd, isOpen, onTap}) => {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isValid, setIsValid] = useState(true)
@@ -39,7 +39,12 @@ const AdminModal = ({addAdmin, isOpen, onTap}) => {
                 setIsSubmitting(false)
                 setIsValid(false)
               } else {
-                addAdmin({username: `${username}`, email: `${email}`});
+                if(addAdmin){
+                  addAdmin({username: `${username}`, email: `${email}`});
+                }
+                if(quickAdd) {
+                  quickAdd();
+                }
                 setIsSubmitting(false)
                 setIsValid(true)
                 onTap();

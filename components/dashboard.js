@@ -131,8 +131,8 @@ const Dashboard = () => {
                 </div>
             </div>
             </div>
-            <AdminModal isOpen={isAdminOpen} onTap={() => setIsAdminOpen(!isAdminOpen)}/>
-            <CategoryModal isOpen={isCategoryOpen} onTap={() => setIsCategoryOpen(!isCategoryOpen)}/>
+            <AdminModal quickAdd={() => setAdminCount(adminCount + 1)} isOpen={isAdminOpen} onTap={() => setIsAdminOpen(!isAdminOpen)}/>
+            <CategoryModal quickAdd={() => setCategoryCount(categoryCount + 1)} isOpen={isCategoryOpen} onTap={() => setIsCategoryOpen(!isCategoryOpen)}/>
         </div>
     )
 }
