@@ -9,6 +9,13 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
         username: admin.username,
         email: admin.email
       })
+    const [isEmailValid, setIsEmailValid] = useState(true);
+
+    const validateEmail = (email) => {
+      const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    
+      return emailPattern.test(email);
+    };
 
     useEffect(() => {
         setInputValues({
@@ -75,7 +82,12 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
       function onSubmit(event) {
         event.preventDefault()
         // console.log(event.target.username.value)
-        registerAdmin(event.target.username.value, event.target.email.value)
+        if(validateEmail(event.target.email.value)){
+          setIsEmailValid(true);
+          registerAdmin(event.target.username.value, event.target.email.value)
+        } else {
+          setIsEmailValid(false);
+        }
       }
 
   return isOpen ? (
@@ -94,6 +106,7 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
         <p className='font-bold mb-1'>Email</p>
         <input value={inputValues.email} type= 'text' name="email" placeholder={'Enter email'} onChange={handleChange} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
     </div>
+    {!isEmailValid && <div className='text-red-400 mt-2 w-full mb-2 font-medium'>Invalid Email</div>}
     {/* <div className='text-left my-1 w-full'>
         <p className='font-bold mb-1'>Password</p>
         <input type= 'password' name="admin_password" placeholder={'Enter password'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>

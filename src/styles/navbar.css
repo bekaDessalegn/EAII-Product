@@ -11,7 +11,7 @@ nav{
     @apply w-[40px] h-[4px] bg-black rounded-[2px]
 }
 .nav__menu-list{
-    @apply flex flex-col fixed top-[60px] w-[288px] gap-[24px] right-[-288px] px-[16px] py-[24px] transition-all
+    @apply flex flex-col fixed top-[60px] w-[288px] gap-[24px] right-[-288px] px-[16px] py-[24px] transition-all bg-white
 }
 .nav__menu-list.active{
   @apply right-0

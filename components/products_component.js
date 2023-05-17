@@ -11,6 +11,7 @@ const ProductsComponent = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [products, setProducts] = useState([])
   const [productId, setProductId] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
@@ -58,6 +59,8 @@ const ProductsComponent = () => {
 
   const fetchData = () => {
 
+    setIsLoading(true);
+
     const token = localStorage.getItem('token');
 
     const query = `
@@ -90,9 +93,10 @@ const ProductsComponent = () => {
           let prods = data.data;
 
           if((typeof prods === 'undefined')) {
-
+            setIsLoading(false);
           } else {
             setProducts(data.data.products);
+            setIsLoading(false);
           }
         });
   }
@@ -115,7 +119,7 @@ const ProductsComponent = () => {
         setIsDeleteOpen(true)}} size={28} className='text-dangerColor cursor-pointer ml-2'/>
     </div>
     <div className='w-screen flex flex-row'>
-    <div className='w-1/2 pl-20'>
+    <div className='w-full pr-20 md:w-1/2 md:pr-0 pl-20'>
       <p className='font-semibold text-[36px] pb-3'>{product.title}</p>
       <p>{product.description}</p>
       <Link href={product.url}><p className='text-primaryColor mt-6 cursor-pointer'>Go to product</p></Link>

@@ -16,6 +16,7 @@ const Dashboard = () => {
     const [productCount, setProductCount] = useState();
     const [categoryCount, setCategoryCount] = useState();
     const [adminCount, setAdminCount] = useState();
+    const [isLoading, setIsLoading] = useState(false);
 
     const router = useRouter();
 
@@ -26,6 +27,8 @@ const Dashboard = () => {
     ];
 
     const fetchData = () => {
+
+        setIsLoading(true)
 
         const token = localStorage.getItem('token');
 
@@ -76,6 +79,7 @@ const Dashboard = () => {
                 setCategoryCount(data.data.categories_aggregate.aggregate.count);
                 setProductCount(data.data.products_aggregate.aggregate.count);
                 setAdminCount(data.data.admin_aggregate.aggregate.count);
+                setIsLoading(false);
               }
             });
       }
@@ -85,7 +89,7 @@ const Dashboard = () => {
       }, []);
 
     return (
-        <div className='flex flex-col justify-center items-center'>
+        isLoading ? <></> : <div className='flex flex-col justify-center items-center'>
             <div className='max-w-fit'>
             <div className='flex flex-row px-10 py-10 border-2 rounded-md mx-10'>
                 <div>
@@ -125,7 +129,7 @@ const Dashboard = () => {
             <div className='m-10'>
                 <p className='text-[20px] font-bold text-secondaryColor'>Quick Links</p>
                 <div className='grid grid-cols-3 mt-4 gap-3'>
-                    <div onClick={() => setIsAdminOpen(true)} className='border-2 border-primaryColor px-3 py-2 rounded-md text-primaryColor text-center font-bold cursor-pointer'>Add Admin</div>
+                    <div onClick={() => setIsAdminOpen(true)} className='border-2 border-primaryColor px-3 py-2 rounded-md text-primaryColor text-center font-bold cursor-pointer flex items-center justify-center'>Add Admin</div>
                     <Link href="products/add_products"><div className='border-2 border-primaryColor px-3 py-2 rounded-md text-primaryColor text-center font-bold cursor-pointer'>Add Product</div></Link>
                     <div onClick={() => setIsCategoryOpen(true)} className='border-2 border-primaryColor px-3 py-2 rounded-md text-primaryColor text-center font-bold cursor-pointer'>Add Category</div>
                 </div>

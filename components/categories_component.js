@@ -15,6 +15,7 @@ const CategoriesComponent = () => {
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState();
   const [isOpen, setIsOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
@@ -62,6 +63,8 @@ const CategoriesComponent = () => {
 
   const fetchData = () => {
 
+    setIsLoading(true);
+
     const token = localStorage.getItem('token');
 
     const query = `
@@ -91,6 +94,7 @@ const CategoriesComponent = () => {
           let cats = data.data;
 
           if((typeof cats === 'undefined')) {
+            setIsLoading(false);
             if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
               cookieCutter.set('signed-in', false)
               localStorage.removeItem('token');
@@ -98,6 +102,7 @@ const CategoriesComponent = () => {
           }
           } else {
             setCategories(data.data.categories);
+            setIsLoading(false);
           }
         });
   }

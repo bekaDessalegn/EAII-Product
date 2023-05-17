@@ -5,6 +5,13 @@ const AdminModal = ({addAdmin, quickAdd, isOpen, onTap}) => {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isValid, setIsValid] = useState(true)
+    const [isEmailValid, setIsEmailValid] = useState(true);
+
+    const validateEmail = (email) => {
+      const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    
+      return emailPattern.test(email);
+    };
 
     function registerAdmin(username, email, password) {
 
@@ -54,7 +61,12 @@ const AdminModal = ({addAdmin, quickAdd, isOpen, onTap}) => {
 
       function onSubmit(event) {
         event.preventDefault()
-        registerAdmin(event.target.username.value, event.target.email.value, event.target.admin_password.value)
+        if(validateEmail(event.target.email.value)){
+          setIsEmailValid(true);
+          registerAdmin(event.target.username.value, event.target.email.value, event.target.admin_password.value)
+        } else {
+          setIsEmailValid(false);
+        }
       }
 
   return isOpen ? (
@@ -73,6 +85,7 @@ const AdminModal = ({addAdmin, quickAdd, isOpen, onTap}) => {
         <p className='font-bold mb-1'>Email</p>
         <input id="email" type= 'text' name="email" placeholder={'Enter email'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
     </div>
+    {!isEmailValid && <div className='text-red-400 mt-2 w-full mb-2 font-medium'>Invalid Email</div>}
     <div className='text-left my-1 w-full'>
         <p className='font-bold mb-1'>Password</p>
         <input id="admin_password" type= 'password' name="admin_password" placeholder={'Enter password'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
