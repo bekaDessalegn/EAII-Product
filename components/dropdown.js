@@ -56,7 +56,7 @@ const Dropdown = ({selectedCategory, setCategory}) => {
           <AiFillCaretUp />
         ) }
         </div>
-        {isOpen && (<div className='bg-textFormbg border-textFormBorderbg border-2 absolute top-14 flex flex-col items-start rounded-lg p-2 w-full'>
+        {isOpen && (<div className='bg-textFormbg border-textFormBorderbg border-2 absolute top-14 flex flex-col items-start rounded-lg p-2 w-full z-50'>
           {categories.map((category, i) => (
             <div onClick={() => {
               setCategory(category.name)

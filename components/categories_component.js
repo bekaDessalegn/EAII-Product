@@ -73,6 +73,7 @@ const CategoriesComponent = () => {
             id
             name
             description
+            icon
           }
           }
         `;
@@ -128,6 +129,7 @@ const CategoriesComponent = () => {
             setSelectedCategory(category);
             setIsDeleteOpen(true)}} size={21} className='text-dangerColor cursor-pointer ml-2'/>
           </div>
+          <img src={category.icon} className='w-[40px] h-[40px] mb-2' />
         <p className='text-[24px]'>{category.name}</p>
         <p className='text-[16px]'>{category.description}</p>
       </div>
@@ -141,6 +143,7 @@ const CategoriesComponent = () => {
         if (category.id == editedCategory.id) {
           category.name = editedCategory.name;
           category.description = editedCategory.description;
+          category.icon = editedCategory.icon;
         }
       })
       setCategories(newCategories);

@@ -1,12 +1,44 @@
 import React, { useState } from 'react'
 import {AiOutlineClose} from 'react-icons/ai'
+import {IoMdAdd} from 'react-icons/io'
+import {BiEdit} from 'react-icons/bi'
 
 const CategoryModal = ({addCategory, quickAdd, isOpen, onTap}) => {
 
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isValid, setIsValid] = useState(true)
+    const [image, setImage] = useState(null);
+    const [isImageNull, setIsImageNull] = useState(false)
 
-    function postCategory(name, description) {
+    const handleImageChange = (e) => {
+      setImage(e.target.files[0]);
+    };
+
+    const hiddenClicked = () => {
+      document.getElementById("hiddenFile").click();
+    }
+
+    async function uploadImage() {
+      let headersList = {
+        "Accept": "*/*"
+       }
+       
+       let bodyContent = new FormData();
+       bodyContent.append("upload_preset", "cvm3azcu");
+       bodyContent.append("file", image);
+       
+       let response = await fetch("https://api.cloudinary.com/v1_1/ddkybdc5n/image/upload", { 
+         method: "POST",
+         body: bodyContent,
+         headers: headersList
+       });
+       
+       let data = await response.json();
+       console.log(data.url);
+       return data.url;
+    }
+
+    function postCategory(name, description, icon) {
 
         const token = localStorage.getItem('token');
         setIsSubmitting(true)
@@ -15,7 +47,8 @@ const CategoryModal = ({addCategory, quickAdd, isOpen, onTap}) => {
                 mutation{
                     insert_categories(objects: {
                     name: "${name}",
-                    description: "${description}"
+                    description: "${description}",
+                    icon: "${icon}",
                     }) {
                     returning{
                         name
@@ -46,7 +79,7 @@ const CategoryModal = ({addCategory, quickAdd, isOpen, onTap}) => {
                 setIsValid(false)
               } else {
                 if(addCategory) {
-                  addCategory({name: `${name}`, description: `${description}`});
+                  addCategory({name: `${name}`, description: `${description}`, icon: `${icon}`});
                 }
                 if(quickAdd) {
                   quickAdd();
@@ -58,13 +91,19 @@ const CategoryModal = ({addCategory, quickAdd, isOpen, onTap}) => {
             });
       }
 
-      function onSubmit(event) {
+      async function onSubmit(event) {
         event.preventDefault()
-        postCategory(event.target.categoryname.value, event.target.categorydescription.value);
+        if(image) {
+          setIsImageNull(false);
+          const imageUrl = await uploadImage();
+          postCategory(event.target.categoryname.value, event.target.categorydescription.value, imageUrl);
+        } else {
+          setIsImageNull(true);
+        }
       }
 
   return isOpen ? (
-    <div className='fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center items-center'>
+    <div className='fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center items-center z-50'>
         <div className='bg-white p-12 rounded-md flex flex-col justify-center items-center w-[500px]'>
             <div className='w-full flex justify-end'>
                 <AiOutlineClose onClick={onTap} className='cursor-pointer' size={25}/>
@@ -78,6 +117,34 @@ const CategoryModal = ({addCategory, quickAdd, isOpen, onTap}) => {
     <div className='text-left my-1 w-full'>
         <p className='font-bold mb-1'>Description</p>
         <textarea name="categorydescription" rows="5" id="categorydescription" placeholder={'Enter the category description'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-1 px-2 rounded-lg' required/>
+    </div>
+    <div className='text-left my-1'>
+        <p className='font-bold mb-1'>Icon</p>
+        {image ? (
+              <div className='relative z-0 max-w-[60px] h-[60px]'>
+                <img className="max-w-[60px] h-[60px] rounded-lg my-5" src={URL.createObjectURL(image)} />
+                <BiEdit onClick={hiddenClicked} className='text-secondaryColor absolute inset-0 z-10 cursor-pointer' size={25}/>
+                <input
+                name="mainImage"
+                type="file"
+                accept="image/*"
+                id='hiddenFile'
+                onChange={handleImageChange}
+                className="invisible h-0"
+              />
+              </div>
+            ) : (<div className='w-full h-[40px] border-2 border-dashed border-textFormBorderbg flex flex-col justify-center items-center'>
+            <IoMdAdd onClick={hiddenClicked} size={40} className='text-primaryColor cursor-pointer'/>
+            <input
+                name="mainImage"
+                type="file"
+                accept="image/*"
+                id='hiddenFile'
+                onChange={handleImageChange}
+                className="invisible h-0"
+              />
+        </div>)}
+        <div className='text-red-400 mt-10 w-full text-center mb-2 font-medium'>{isImageNull ? "Icon can not be null" : ""}</div>
     </div>
     <div className='text-red-400 mt-10 w-full text-center mb-2 font-medium'>{isValid ? "" : "Something went wrong"}</div>
     <button type='submit' disabled={isSubmitting} className='w-full bg-secondaryColor disabled:bg-gray-300 disabled:text-gray-600 text-onPrimary rounded-lg cursor-pointer  py-2 text-center hover:bg-primaryColor'>
