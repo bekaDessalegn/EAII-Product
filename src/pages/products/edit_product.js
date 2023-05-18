@@ -5,16 +5,19 @@ import {BiEdit} from 'react-icons/bi'
 import Dropdown from '../../../components/dropdown'
 import { useRouter } from 'next/router'
 import cookieCutter from 'cookie-cutter'
+import TypeDropdown from '../../../components/type_dropdown'
 
 const EditProducts = () => {
     const [image, setImage] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState("Options")
+    const [selectedType, setSelectedType] = useState("Options")
     const [isValid, setIsValid] = useState(true)
+    const [isTypeValid, setIsTypeValid] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [inputValues, setInputValues] = useState({
         id: "",
         title: "",
-        url: "",
+        link: [],
         description: ""
       })
 
@@ -32,7 +35,7 @@ const EditProducts = () => {
                   id
                   title
                   description
-                  url
+                  link
                   image_path
                   category_name
                 }
@@ -66,7 +69,7 @@ const EditProducts = () => {
                 setInputValues({
                     id: prod.id,
                     title: prod.title,
-                    url: prod.url,
+                    link: prod.link,
                     description: prod.description
                   })
                 setSelectedCategory(prod.category_name);
@@ -157,22 +160,44 @@ const EditProducts = () => {
 
       async function onSubmit(event) {
         event.preventDefault();
-        setIsSubmitting(true)
-        if(selectedCategory == "Options") {
-          setIsValid(false);
-        } else {
-          setIsValid(true);
-          if(image) {
-            if(typeof image === 'string' || image instanceof String){
-                editProduct(event.target.title.value, event.target.description.value, event.target.url.value, image, selectedCategory);
-            } else {
-                const imageUrl = await uploadImage();
-                editProduct(event.target.title.value, event.target.description.value, event.target.url.value, imageUrl, selectedCategory);
-            }
-            setIsSubmitting(false);
+        if(types.length > 0) {
+          if(selectedCategory == "Options") {
+            setIsValid(false);
           } else {
-            setIsSubmitting(false);
+            setIsValid(true);
+            if(image) {
+              setIsSubmitting(true)
+              if(typeof image === 'string' || image instanceof String){
+                  editProduct(event.target.title.value, event.target.description.value, event.target.url.value, image, selectedCategory);
+              } else {
+                  const imageUrl = await uploadImage();
+                  editProduct(event.target.title.value, event.target.description.value, event.target.url.value, imageUrl, selectedCategory);
+              }
+              setIsSubmitting(false);
+            } else {
+              setIsSubmitting(false);
+            }
           }
+        } else {
+          setIsTypeValid(false);
+          if (typeof window !== 'undefined') {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth',
+            });
+          }
+        }
+      }
+
+      function addType(type, url) {
+        console.log(`"${JSON.stringify(types)}"`);
+        if(selectedType !== "Options" && document.getElementById('url').value !== ''){
+          setIsTypeValid(true);
+          setTypes([...types, {type: type, url: url}]);
+          document.getElementById('url').value = "";
+          setSelectedType("Options");
+        } else {
+          setIsTypeValid(false);
         }
       }
 
@@ -189,10 +214,30 @@ const EditProducts = () => {
         <p className='font-bold mb-1'>Title</p>
         <input id="title" type= 'text' name="title" placeholder={'Enter the product title'} value={inputValues.title} onChange={handleChange} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
     </div>
-    <div className='text-left my-4'>
-        <p className='font-bold mb-1'>URL</p>
-        <input id="url" type= 'text' name="url" placeholder={'Enter the product url'} value={inputValues.url} onChange={handleChange} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
-    </div>
+    {inputValues.link.map((type, index) => (
+      <div key={index} className='text-left text-secondaryColor my-4 flex flex-row gap-3'>
+      <div className='w-full'>
+          <p className='font-bold mb-1'>Type</p>
+          <div className='w-full border-2 bg-surface rounded-md py-2 px-2'>{type.type}</div>
+          </div>
+          <div className='w-full'>
+          <p className='font-bold mb-1'>URL</p>
+          <div className='w-full border-2 bg-surface rounded-md py-2 px-2'>{type.url}</div>
+          </div>
+      </div>
+    ))}
+    <div className='text-left my-4 flex flex-row gap-3'>
+      <div>
+          <p className='font-bold mb-1'>Type</p>
+          <TypeDropdown selectedType={selectedType} setType= {(category) => setSelectedType(category)} />
+          </div>
+          <div className='w-full'>
+          <p className='font-bold mb-1'>URL</p>
+          <input id="url" type= 'text' name="url" placeholder={'Enter the product url'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg'/>
+          </div>
+          <div onClick={() => addType(selectedType, document.getElementById('url').value)} className='text-onPrimary rounded-md bg-primaryColor hover:bg-secondaryColor px-6 flex items-center text-center cursor-pointer'>Add</div>
+      </div>
+      {isTypeValid ? "" : <div className='text-red-400 mt-2 w-full font-medium'>{"Please fill this field"}</div>}
     <div className='text-left my-4'>
         <p className='font-bold mb-1'>Category</p>
         <Dropdown selectedCategory={selectedCategory} setCategory= {(category) => setSelectedCategory(category)} />

@@ -8,7 +8,7 @@ export default function DeleteModal({ isOpen, onClose, title, children, onClick 
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed z-10 inset-0 overflow-y-auto"
+        className="fixed z-50 inset-0 overflow-y-auto"
         onClose={onClose}
       >
         <div className="flex items-center justify-center min-h-screen">

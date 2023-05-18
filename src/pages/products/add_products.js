@@ -45,81 +45,103 @@ const AddProducts = () => {
          let data = await response.json();
          console.log(data.url);
          return data.url;
-      }
+      }     
 
-      function postProduct(title, description, url, image_path, category_name) {
+      async function postProduct(title, description, image_path, category_name) {
 
         const token = localStorage.getItem('token');
-    
-        const query = `
-                mutation{
-                    insert_products(objects: {
-                      title: "${title}",
-                      description: "${description}",
-                      link: {
-                        type: "${selectedType}",
-                        url: "${url}"
-                      },
-                      image_path: "${image_path}",
-                      category_name: "${category_name}"
-                    }){
-                      returning{
-                        title
-                      }
-                    }
-                }
-            `;
-    
-            const options = {
-            method: 'POST',
-            headers: {
-              "Accept": "*/*",
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-          },
-            body: JSON.stringify({ query })
-            };
-    
-            fetch(process.env.baseUrl, options)
+
+        let headersList = {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+         }
+         
+         let gqlBody = {
+           query: `mutation insertProduct($spec: jsonb){
+           insert_products(objects: {
+             title: "${title}",
+             category_name: "${category_name}",
+             link: $spec,
+             description: "${description}",
+             image_path: "${image_path}"
+           }){
+             returning{
+               title
+               link
+             }
+           }
+         }`,
+           variables: {"spec":types}
+         }
+         
+         let bodyContent =  JSON.stringify(gqlBody);
+
+         fetch(process.env.baseUrl, { 
+          method: "POST",
+          body: bodyContent,
+          headers: headersList
+        })
             .then(response => response.json())
             .then(data => {
     
               let category = data.data;
     
               if((typeof category === 'undefined')) {
+                console.log(data)
+                setIsSubmitting(false);
                 if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
                   cookieCutter.set('signed-in', false)
                   localStorage.removeItem('token');
                   router.replace('/signin')
               }
               } else {
-                setIsSubmitting(false)
+                // setIsSubmitting(false)
                 router.replace('/products')
               }
             });
+         
       }
 
       async function onSubmit(event) {
         event.preventDefault();
-        setIsSubmitting(true)
-        if(selectedType == "Options"){
-          setIsTypeValid(false);
-        } else {
+        console.log(`${(JSON.stringify(types))}`);
+        if(types.length > 0) {
           setIsTypeValid(true);
           if(selectedCategory == "Options") {
             setIsValid(false);
           } else {
             setIsValid(true);
             if(image) {
+              setIsSubmitting(true)
               setIsImageNull(false);
               const imageUrl = await uploadImage();
-              postProduct(event.target.title.value, event.target.description.value, event.target.url.value, imageUrl, selectedCategory);
-              setIsSubmitting(false);
+              postProduct(event.target.title.value, event.target.description.value, imageUrl, selectedCategory);
             } else {
               setIsImageNull(true);
               setIsSubmitting(false);
             }
           }
+        } else {
+          setIsTypeValid(false);
+          if (typeof window !== 'undefined') {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth',
+            });
+          }
+        }
+      }
+
+      function addType(type, url) {
+        console.log(`"${JSON.stringify(types)}"`);
+        if(selectedType !== "Options" && document.getElementById('url').value !== ''){
+          setIsTypeValid(true);
+          setTypes([...types, {type: type, url: url}]);
+          document.getElementById('url').value = "";
+          setSelectedType("Options");
+        } else {
+          setIsTypeValid(false);
         }
       }
 
@@ -136,17 +158,30 @@ const AddProducts = () => {
         <p className='font-bold mb-1'>Title</p>
         <input id="title" type= 'text' name="title" placeholder={'Enter the product title'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
     </div>
+    {types.map((type, index) => (
+      <div key={index} className='text-left text-secondaryColor my-4 flex flex-row gap-3'>
+      <div className='w-full'>
+          <p className='font-bold mb-1'>Type</p>
+          <div className='w-full border-2 bg-surface rounded-md py-2 px-2'>{type.type}</div>
+          </div>
+          <div className='w-full'>
+          <p className='font-bold mb-1'>URL</p>
+          <div className='w-full border-2 bg-surface rounded-md py-2 px-2'>{type.url}</div>
+          </div>
+      </div>
+    ))}
     <div className='text-left my-4 flex flex-row gap-3'>
-    <div>
-        <p className='font-bold mb-1'>Type</p>
-        <TypeDropdown selectedType={selectedType} setType= {(category) => setSelectedType(category)} />
-        {isTypeValid ? "" : <div className='text-red-400 mt-10 w-full text-center mb-2 font-medium'>{"Please select a type"}</div>}
-        </div>
-        <div className='w-full'>
-        <p className='font-bold mb-1'>URL</p>
-        <input id="url" type= 'text' name="url" placeholder={'Enter the product url'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
-        </div>
-    </div>
+      <div>
+          <p className='font-bold mb-1'>Type</p>
+          <TypeDropdown selectedType={selectedType} setType= {(category) => setSelectedType(category)} />
+          </div>
+          <div className='w-full'>
+          <p className='font-bold mb-1'>URL</p>
+          <input id="url" type= 'text' name="url" placeholder={'Enter the product url'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg'/>
+          </div>
+          <div onClick={() => addType(selectedType, document.getElementById('url').value)} className='text-onPrimary rounded-md bg-primaryColor hover:bg-secondaryColor px-6 flex items-center text-center cursor-pointer'>Add</div>
+      </div>
+      {isTypeValid ? "" : <div className='text-red-400 mt-2 w-full font-medium'>{"Please fill this field"}</div>}
     <div className='text-left my-4'>
         <p className='font-bold mb-1'>Category</p>
         <Dropdown selectedCategory={selectedCategory} setCategory= {(category) => setSelectedCategory(category)} />
