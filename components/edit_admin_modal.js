@@ -91,7 +91,7 @@ const EditAdminModal = ({admin, editAdmin, isOpen, onTap}) => {
       }
 
   return isOpen ? (
-    <div className='fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center items-center'>
+    <div className='fixed inset-0 bg-black/25 backdrop-blur-sm flex justify-center items-center z-50'>
         <div className='bg-white p-12 rounded-md flex flex-col justify-center items-center w-[500px]'>
             <div className='w-full flex justify-end'>
                 <AiOutlineClose onClick={onTap} className='cursor-pointer' size={25}/>

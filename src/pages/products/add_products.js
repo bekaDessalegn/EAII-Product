@@ -6,6 +6,7 @@ import Dropdown from '../../../components/dropdown'
 import { useRouter } from 'next/router'
 import cookieCutter from 'cookie-cutter'
 import TypeDropdown from '../../../components/type_dropdown'
+import { AiOutlineDelete } from 'react-icons/ai'
 
 const AddProducts = () => {
     const [image, setImage] = useState(null);
@@ -168,6 +169,9 @@ const AddProducts = () => {
           <p className='font-bold mb-1'>URL</p>
           <div className='w-full border-2 bg-surface rounded-md py-2 px-2'>{type.url}</div>
           </div>
+          <AiOutlineDelete onClick={() => {
+            setTypes([...types.slice(0, index), ...types.slice(index + 1)]);
+          }} size={50} className='text-dangerColor cursor-pointer mt-6'/>
       </div>
     ))}
     <div className='text-left my-4 flex flex-row gap-3'>

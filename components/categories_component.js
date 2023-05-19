@@ -69,7 +69,7 @@ const CategoriesComponent = () => {
 
     const query = `
         query {
-          categories{
+          categories(order_by: {created_at: asc}){
             id
             name
             description
