@@ -14,10 +14,10 @@ const EditProducts = () => {
     const [isValid, setIsValid] = useState(true)
     const [isTypeValid, setIsTypeValid] = useState(true)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [types, setTypes] = useState([])
     const [inputValues, setInputValues] = useState({
         id: "",
         title: "",
-        link: [],
         description: ""
       })
 
@@ -69,9 +69,9 @@ const EditProducts = () => {
                 setInputValues({
                     id: prod.id,
                     title: prod.title,
-                    link: prod.link,
                     description: prod.description
                   })
+                setTypes(prod.link);
                 setSelectedCategory(prod.category_name);
                 setImage(prod.image_path);
               }
@@ -115,44 +115,55 @@ const EditProducts = () => {
         setInputValues((prevState) => ({ ...prevState, [name]: value }));
       };
 
-      function editProduct(title, description, url, image_path, category_name) {
+      function editProduct(title, description, image_path, category_name) {
 
         const token = localStorage.getItem('token');
-    
-        const query = `
-                mutation{
-                    update_products_by_pk(pk_columns: {id: ${parseInt(id)}}
-                    _set: {
-                      title: "${title}",
-                      description: "${description}",
-                      url: "${url}",
-                      image_path: "${image_path}",
-                      category_name: "${category_name}"
-                    }){
-                        title
-                    }
-                }
-            `;
-    
-            const options = {
-            method: 'POST',
-            headers: {
-              "Accept": "*/*",
-              "Authorization": `Bearer ${token}`,
-              "Content-Type": "application/json"
-          },
-            body: JSON.stringify({ query })
-            };
-    
-            fetch(process.env.baseUrl, options)
+
+        let headersList = {
+          "Accept": "*/*",
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+         }
+         
+         let gqlBody = {
+           query: `mutation updateProduct($spec: jsonb){
+           update_products_by_pk(pk_columns: {id: ${parseInt(id)}}
+           _set: {
+             title: "${title}",
+             category_name: "${category_name}",
+             link: $spec,
+             description: "${description}",
+             image_path: "${image_path}"
+           }){
+              title
+              link
+           }
+         }`,
+           variables: {"spec":types}
+         }
+         
+         let bodyContent =  JSON.stringify(gqlBody);
+
+         fetch(process.env.baseUrl, { 
+          method: "POST",
+          body: bodyContent,
+          headers: headersList
+        })
             .then(response => response.json())
             .then(data => {
     
               let category = data.data;
     
               if((typeof category === 'undefined')) {
+                console.log(data)
+                setIsSubmitting(false);
+                if(data.errors[0].message === "Could not verify JWT: JWTExpired") {
+                  cookieCutter.set('signed-in', false)
+                  localStorage.removeItem('token');
+                  router.replace('/signin')
+              }
               } else {
-                setIsSubmitting(false)
+                // setIsSubmitting(false)
                 router.replace('/products')
               }
             });
@@ -168,10 +179,10 @@ const EditProducts = () => {
             if(image) {
               setIsSubmitting(true)
               if(typeof image === 'string' || image instanceof String){
-                  editProduct(event.target.title.value, event.target.description.value, event.target.url.value, image, selectedCategory);
+                  editProduct(event.target.title.value, event.target.description.value, image, selectedCategory);
               } else {
                   const imageUrl = await uploadImage();
-                  editProduct(event.target.title.value, event.target.description.value, event.target.url.value, imageUrl, selectedCategory);
+                  editProduct(event.target.title.value, event.target.description.value, imageUrl, selectedCategory);
               }
               setIsSubmitting(false);
             } else {
@@ -214,7 +225,7 @@ const EditProducts = () => {
         <p className='font-bold mb-1'>Title</p>
         <input id="title" type= 'text' name="title" placeholder={'Enter the product title'} value={inputValues.title} onChange={handleChange} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required/>
     </div>
-    {inputValues.link.map((type, index) => (
+    {types.map((type, index) => (
       <div key={index} className='text-left text-secondaryColor my-4 flex flex-row gap-3'>
       <div className='w-full'>
           <p className='font-bold mb-1'>Type</p>
