@@ -26,8 +26,8 @@ const SignIn = () => {
                 <p className='text-gray mb-2'>Please sign in to your account</p>
                 <form onSubmit={submit}>
                 <div className='text-left my-1'>
-        <p className='font-bold mb-1'>Username</p>
-        <input type= 'text' name="username" placeholder={'Enter your username'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required />
+        <p className='font-bold mb-1'>Email</p>
+        <input type= 'text' name="username" placeholder={'Enter your email'} className='bg-textFormbg border-textFormBorderbg border-2 outline-none w-full py-2 px-2 rounded-lg' required />
     </div>
     <div className='text-left my-1'>
         <p className='font-bold mb-1'>Password</p>
