@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    baseUrl: 'http://localhost:8080/v1/graphql'
+    baseUrl: 'https://eaii-product.hasura.app/v1/graphql'
   },
   eslint: {
     ignoreDuringBuilds: true,
